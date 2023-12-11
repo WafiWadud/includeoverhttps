@@ -4,7 +4,7 @@
 #include <curl/curl.h>
 #include <regex.h>
 
-int download_file(char* url, char* filename) {
+void download_file(char* url, char* filename) {
     CURL *curl;
     FILE *fp;
     CURLcode res;
@@ -19,17 +19,10 @@ int download_file(char* url, char* filename) {
         /* always cleanup */
         curl_easy_cleanup(curl);
         fclose(fp);
-	    return 0;
-    } else {
-        return 1;
     }
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        printf("Usage: %s <file>");
-        return 1;
-    }
     FILE *file = fopen(argv[1], "r");
     FILE *new_file = fopen("source_file.mod.c", "w");
     char line[256];
@@ -38,10 +31,11 @@ int main(int argc, char *argv[]) {
 
     // Compile the regular expression
     regcomp(&regex, "#include \"(http://[^\"]*)\"", REG_EXTENDED);
-    char url[256];
+
     while (fgets(line, sizeof(line), file)) {
         if (regexec(&regex, line, 2, matches, 0) == 0) {
             // matches[1] contains the first match
+            char url[256];
             strncpy(url, &line[matches[1].rm_so], matches[1].rm_eo - matches[1].rm_so);
             url[matches[1].rm_eo - matches[1].rm_so] = '\0'; // null terminate the url string
 
@@ -49,15 +43,12 @@ int main(int argc, char *argv[]) {
             strcpy(filename, strrchr(url, '/') + 1);
             strcat(filename, ".h");
 
-            if (download_file(url, filename) == 1) {
-                return 1;
-            }
+            download_file(url, filename);
 
             // Replace the URL with the local file name
             strncpy(&line[matches[1].rm_so], filename, strlen(filename));
             line[matches[1].rm_so + strlen(filename)] = '\"'; // replace the end quote
-            line[matches[1].rm_so + strlen(filename) + 1] = '\n'; // add a newline
-            line[matches[1].rm_so + strlen(filename) + 2] = '\0'; // null terminate the line
+            line[matches[1].rm_so + strlen(filename) + 1] = '\0'; // null terminate the line
         }
         fputs(line, new_file);
     }
@@ -69,17 +60,7 @@ int main(int argc, char *argv[]) {
     fclose(new_file);
 
     // Compile the source file
-    system("gcc -o output source_file.mod.c -Wpedantic --pedantic");
-    // Remove the downloaded .h files and the source_file.mod.c
-    while (fgets(line, sizeof(line), file)) {
-        if (regexec(&regex, line, 2, matches, 0) == 0) {
-            char filename[256];
-            strcpy(filename, strrchr(url, '/') + 1);
-            strcat(filename, ".h");
-            remove(filename);
-        }
-    }
-    remove("source_file.mod.c");
+    system("gcc -o output source_file.mod.c");
 
     return 0;
 }
