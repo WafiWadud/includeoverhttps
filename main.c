@@ -19,7 +19,7 @@ int download_file(char* url, char* filename) {
         /* always cleanup */
         curl_easy_cleanup(curl);
         fclose(fp);
-	return 0;
+	    return 0;
     } else {
         return 1;
     }
@@ -69,10 +69,7 @@ int main(int argc, char *argv[]) {
     fclose(new_file);
 
     // Compile the source file
-    if (system("gcc -o output source_file.mod.c -Wpedantic --pedantic") != 0) {
-        return 1;
-    }
-
+    system("gcc -o output source_file.mod.c -Wpedantic --pedantic");
     // Remove the downloaded .h files and the source_file.mod.c
     while (fgets(line, sizeof(line), file)) {
         if (regexec(&regex, line, 2, matches, 0) == 0) {
