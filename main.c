@@ -49,11 +49,7 @@ int main(int argc, char *argv[]) {
             strcpy(filename, strrchr(url, '/') + 1);
             strcat(filename, ".h");
 
-            if (download_file(url, filename) != 0) {
-                regfree(&regex);
-                fclose(file);
-                fclose(new_file);
-                break;
+            if (download_file(url, filename) == 1) {
                 return 1;
             }
 
