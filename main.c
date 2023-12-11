@@ -19,6 +19,7 @@ int download_file(char* url, char* filename) {
         /* always cleanup */
         curl_easy_cleanup(curl);
         fclose(fp);
+	return 0;
     } else {
         return 1;
     }
