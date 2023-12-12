@@ -27,4 +27,4 @@ with open('source_file.mod.c', 'w') as file:
    file.writelines(lines)
 
 # Compile the source file
-subprocess.run(['gcc', '-o', 'output', 'source_file.mod.c'])
+subprocess.run(['gcc', '-o', 'output', 'source_file.mod.c', '-Wpedantic', '--pedantic'])
